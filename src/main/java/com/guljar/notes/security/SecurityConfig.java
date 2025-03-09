@@ -5,11 +5,16 @@ import com.guljar.notes.model.Role;
 import com.guljar.notes.model.User;
 import com.guljar.notes.repositories.RoleRepository;
 import com.guljar.notes.repositories.UserRepository;
+import com.guljar.notes.security.jwt.AuthEntryPointJwt;
+import com.guljar.notes.security.jwt.AuthTokenFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -35,6 +40,14 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 public class SecurityConfig {
 
+    @Autowired
+    private AuthEntryPointJwt unauthorizedHandler;
+
+    @Bean
+    public AuthTokenFilter authenticationJwtTokenFilter() {
+        return new AuthTokenFilter();
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http/*, CustomLoggingFilter customLoggingFilter*/) throws Exception {
         http.csrf(csrf ->
@@ -47,12 +60,21 @@ public class SecurityConfig {
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers("/public/**").permitAll()
                 .requestMatchers("/api/csrf-token").permitAll()
+                .requestMatchers("/api/auth/public/**").permitAll()
                 .anyRequest().authenticated());
+        http.exceptionHandling(exception ->
+                exception.authenticationEntryPoint(unauthorizedHandler));
+        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         http.formLogin(withDefaults());
 /*        http.addFilterBefore(new CustomLoggingFilter() , UsernamePasswordAuthenticationFilter.class);
         http.addFilterAfter(new RequestValidationFilter(),CustomLoggingFilter.class);*/
         http.httpBasic(withDefaults());
         return http.build();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception{
+        return authenticationConfiguration.getAuthenticationManager();
     }
 
     @Bean
