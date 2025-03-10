@@ -93,7 +93,7 @@ public class SecurityConfig {
             Role adminRole = roleRepository.findByRoleName(AppRole.ROLE_ADMIN)
                     .orElseGet(() -> roleRepository.save(new Role(AppRole.ROLE_ADMIN)));
 
-            if (!userRepository.existsByUserName("user1")) {
+/*            if (!userRepository.existsByUserName("user1")) {
                 User user1 = new User("user1", "user1@gmail.com", passwordEncoder.encode("user1pass"));
                 user1.setAccountNonLocked(false);
                 user1.setAccountNonExpired(true);
@@ -119,7 +119,8 @@ public class SecurityConfig {
                 admin.setSignUpMethod("email");
                 admin.setRole(adminRole);
                 userRepository.save(admin);
-            }
+
+            }*/
         };
     }
 
