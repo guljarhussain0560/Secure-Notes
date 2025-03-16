@@ -9,7 +9,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
+//this is cros origin configuration for the admin controller
+//this cros only acces those apis to frontend which are allowed i.e in this class
+//@CrossOrigin( origins = "http://localhost:3000", maxAge = 3600, allowedHeaders = "true)
 @RestController
 @RequestMapping("/api/admin")
 @PreAuthorize("hasRole('ROLE_ADMIN')")

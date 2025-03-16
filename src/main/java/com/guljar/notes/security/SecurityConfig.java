@@ -28,6 +28,7 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 import javax.sql.DataSource;
 
@@ -49,12 +50,14 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http/*, CustomLoggingFilter customLoggingFilter*/) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,/*, CustomLoggingFilter customLoggingFilter*/CorsConfigurationSource corsConfigurationSource) throws Exception {
         http.csrf(csrf ->
                 csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                         .ignoringRequestMatchers("/api/auth/public/**")
         );
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource));
         //http.csrf(AbstractHttpConfigurer::disable);
+
         http.authorizeHttpRequests((requests)
                 -> requests
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
